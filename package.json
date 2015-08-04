@@ -1,0 +1,27 @@
+{
+  "name": "tiptocomment",
+  "version": "1.0.0",
+  "description": "A standalone service to validate comments on the bitcoin blockchain",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andrewmalta13/tip-to-comment.git"
+  },
+  "keywords": [
+    "blockchain",
+    "bitcoin",
+    "blockai",
+    "openpublish",
+    "comment",
+    "contracts"
+  ],
+  "author": "Andrew Malta <andrew.malta@yale.edu>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/andrewmalta13/tip-to-comment/issues"
+  },
+  "homepage": "https://github.com/andrewmalta13/tip-to-comment"
+}
