@@ -26,7 +26,6 @@
   },
   "homepage": "https://github.com/andrewmalta13/tip-to-comment",
   "dependencies": {
-    "basic-auth": "^1.0.3",
     "bitcoinjs-lib": "^1.5.7",
     "blockcypher-unofficial": "^1.4.2",
     "body-parser": "^1.13.3",

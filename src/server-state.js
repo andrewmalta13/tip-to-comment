@@ -1,5 +1,4 @@
 var bitcoinjs = require('bitcoinjs-lib');
-var basicAuth = require('basic-auth');
 var openpublishState = require('openpublish-state')({
   network: "testnet"
 });
@@ -9,7 +8,6 @@ var serverState = function(options) {
   var app = options.app;
   var commonBlockchain = options.commonBlockchain;
   var dbclient = options.dbclient;
-  var express = options.express;
 
   function checkSig (address, signature, message, network) {
     return(bitcoinjs.Message.verify(address, signature, message, network));
@@ -91,51 +89,6 @@ var serverState = function(options) {
       }
     });
   }
-  
-  var getUserCommentsAuth = function (req, res, next) {
-    function unauthorized(res) {
-      res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
-      return res.send(401);
-    };
-
-    var user = basicAuth(req);
-
-    if (!user || !user.name || !user.pass) {
-      return unauthorized(res);
-    };
-
-    if (checkSig(user.name, user.pass, "tiptocomment", bitcoinjs.networks.testnet)) {
-      next();
-    } else {
-      return unauthorized(res);
-    };
-  };
-
-  var getPostCommentsAuth = function (req, res, next) {
-    function unauthorized(res) {
-      res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
-      return res.send(401);
-    };
-
-    var user = basicAuth(req);
-
-    if (!user || !user.name || !user.pass) {
-      return unauthorized(res);
-    };
-
-    if (checkSig(user.name, user.pass, "tiptocomment", bitcoinjs.networks.testnet) && req.query.address === user.name) {
-      next();
-    } else {
-      return unauthorized(res);
-    };
-  };
-
-
-
-
-  app.get('/', function (req, res, next) {
-    res.end("hello world");
-  });
 
   app.post('/comment', function (req, res, next){
     if(req.body.address && req.body.signature && req.body.comment && req.body.network && req.body.sha1) {
@@ -157,32 +110,48 @@ var serverState = function(options) {
     }
   });
 
-  app.get('/getAddressComments', getUserCommentsAuth, function (req, res, next) {
-    if (req.query.address) {
-      var address = req.query.address;
-      getCommentsByUser(address, function (err, response) {
-        if (err) {
-          var err = new Error(err);
-          err.status = 500;
-          next(err);
-        }
-        else {
-          res.send(JSON.stringify(response));
-        }
-      });
-    }
-    else {
-      var err = new Error("You must specify an address");
+  app.get('/getComments/:method/:param', function (req, res, next) {
+    var method = req.params["method"];
+    var param = req.params["param"];
+
+    var signature = req.header('signature');
+    var address = req.header('address');
+    var network = req.header('network');
+
+    if(!signature || !address || !network) {
+      var err = new Error("Missing parameters to retrieve comments");
       err.status = 500;
       next(err);
     }
-  });
-
-  app.get('getPostComments', getPostCommentsAuth, function (req, req, next) {
-    if (req.query.sha1) {
-      checkTip(req.query.sha1, req.query.address, function (err, hasTipped) {
-        if (hasTipped) {
-          getCommentsByPost(req.query.sha1, function (err, response) {
+    else if (method === "address" && param) {
+      var queryAddress = param;
+      network = (network === "testnet") ? bitcoinjs.networks.testnet : null;
+      
+      if (checkSig(address, signature, queryAddress, network)) {
+        getCommentsByUser(queryAddress, function (err, response) {
+          if (err) {
+            var err = new Error(err);
+            err.status = 500;
+            next(err);
+          }
+          else {
+            res.send(response);
+          }
+        });
+      }
+      else {
+        var err = new Error("Authentication failed");
+        err.status = 500;
+        next(err);
+      }    
+    }
+    else if (method === "sha1" && param) {
+      var sha1 = param;
+      network = (network === "testnet") ? bitcoinjs.networks.testnet : null;
+      var options = {address: address, signature: signature, network: network, body: param, sha1: sha1};
+      validate(options, function (err, isValid) {
+        if (isValid) {
+          getCommentsByPost(sha1, function (err, response) {
             if (err) {
               var err = new Error(err);
               err.status = 500;
@@ -194,57 +163,18 @@ var serverState = function(options) {
           });
         }
         else {
-          var err = new Error("Invalid method of retrieving comments.");
+          var err = new Error("User has either not tipped or not authenticated properly");
           err.status = 500;
           next(err);
         }
       });
     }
     else {
-      var err = new Error("You must specify a sha1");
+      var err = new Error("Method Not Defined");
       err.status = 500;
       next(err);
     }
-  });
-
-
-
-  //   else {
-  //     var signature = req.body.signature;
-  //     var address = req.body.address;
-  //     var network = (req.body.network === "testnet") ? bitcoinjs.networks.testnet : null;
-
-  //     var options = {signature: signature, address: address, network: network, body: "tiptocomment"};
-
-  //     validate(options, function (err, isValid) {
-  //       if (isValid) {
-  //         if (method === "sha1" && param) {
-  //           var sha1 = param;
-  //           getCommentsByPost(sha1, function (err, response) {
-  //             if (err) {
-  //               var err = new Error(err);
-  //               err.status = 500;
-  //               next(err);
-  //             }
-  //             else {
-  //               res.end(response);
-  //             }
-  //           });
-  //         }
-  //         else {
-  //           var err = new Error("Invalid method of retrieving comments.");
-  //           err.status = 500;
-  //           next(err);
-  //         }
-  //       }
-  //       else {
-  //         var err = new Error("User has either not tipped or not authenticated properly");
-  //         err.status = 500;
-  //         next(err);
-  //       }
-  //     });
-  //   }
-  // });   
+  });   
 };
 
 

@@ -32,7 +32,6 @@ dbclient.connect(function(err){
 
 serverState({
   app: app,
-  express: express,
   commonBlockchain: commonblockchain,
   dbclient: dbclient
 });
