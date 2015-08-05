@@ -4,7 +4,8 @@
   "description": "A standalone service to validate comments on the bitcoin blockchain",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "foreman start"
   },
   "repository": {
     "type": "git",
@@ -23,5 +24,14 @@
   "bugs": {
     "url": "https://github.com/andrewmalta13/tip-to-comment/issues"
   },
-  "homepage": "https://github.com/andrewmalta13/tip-to-comment"
+  "homepage": "https://github.com/andrewmalta13/tip-to-comment",
+  "dependencies": {
+    "basic-auth": "^1.0.3",
+    "bitcoinjs-lib": "^1.5.7",
+    "blockcypher-unofficial": "^1.4.2",
+    "body-parser": "^1.13.3",
+    "cors": "^2.7.1",
+    "openpublish-state": "0.0.3",
+    "pg": "^4.4.1"
+  }
 }
