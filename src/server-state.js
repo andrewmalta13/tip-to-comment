@@ -175,6 +175,26 @@ var serverState = function(options) {
       next(err);
     }
   });   
+
+  app.get('/getNumComments/:sha1', function (req, res, next) {
+    if(req.params['sha1']) {
+      getCommentsByPost(req.params['sha1'], function (err, comments) {
+        if (err) {
+          var err = new Error(err);
+          err.status = 500;
+          next(err);
+        }
+        else {
+          res.send("" + comments.length);
+        }
+      });
+    }
+    else {
+      var err = new Error("no sha1 specified");
+      err.status = 500;
+      next(err);
+    }
+  });
 };
 
 
