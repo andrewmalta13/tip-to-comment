@@ -132,7 +132,7 @@ var serverState = function(options) {
             res.end();
           }
           else {
-            res.send(response);
+            res.status(200).send(response);
             res.end();
           }
         });
@@ -153,7 +153,7 @@ var serverState = function(options) {
               res.status(500).send(err);
             }
             else {
-              res.send(response);
+              res.status(200).send(response);
               res.end();
             }
           });
@@ -178,7 +178,7 @@ var serverState = function(options) {
           res.end();
         }
         else {
-          res.send("" + comments.length);
+          res.status(200).send("" + comments.length);
           res.end();
         }
       });
