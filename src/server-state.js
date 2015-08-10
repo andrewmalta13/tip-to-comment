@@ -24,12 +24,15 @@ var serverState = function(options) {
           callback(false, true);
         }
         else {
-          for (var i = 0; i < tipInfo.tips.length; i++) {
-            if (tipInfo.tips[i].sourceAddresses[0] === address) {
+          var tipCount = 0;
+          tipInfo.tips.forEach(function (tip) {
+            if (tip.sourceAddresses[0] === address) {
               callback(false, true);
             }
-          }
-          callback("user has not tipped", false);
+            else if (++tipCount === tipInfo.tips.length) {
+              callback("user has not tipped", false);
+            }
+          });
         }
       }
     });
@@ -161,7 +164,6 @@ var serverState = function(options) {
         }
         else {
           res.status(200).send("User has either not tipped or not authenticated properly");
-          res.end();
         }
       });
     }
