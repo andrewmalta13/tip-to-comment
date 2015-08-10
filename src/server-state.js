@@ -25,7 +25,7 @@ var serverState = function(options) {
         }
         else {
           for (var i = 0; i < tipInfo.tips.length; i++) {
-            if (tipInfo.tipper === address) {
+            if (tipInfo.sourceAddress[0] === address) {
               callback(false, true);
             }
           }
