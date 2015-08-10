@@ -104,9 +104,7 @@ var serverState = function(options) {
       });
     }
     else {
-      var err = new Error("Missing parameters to comment");
-      err.status = 500;
-      next(err);
+      res.status(500).send('Missing arguments to comment!');
     }
   });
 
@@ -119,9 +117,7 @@ var serverState = function(options) {
     var network = req.header('network');
 
     if(!signature || !address || !network) {
-      var err = new Error("Missing parameters to retrieve comments");
-      err.status = 500;
-      next(err);
+      res.status(500).send('Missing arguments to retrieve comments!');
     }
     else if (method === "address" && param) {
       var queryAddress = param;
@@ -130,9 +126,7 @@ var serverState = function(options) {
       if (checkSig(address, signature, queryAddress, network)) {
         getCommentsByUser(queryAddress, function (err, response) {
           if (err) {
-            var err = new Error(err);
-            err.status = 500;
-            next(err);
+            res.status(500).send(err);
           }
           else {
             res.send(response);
@@ -140,9 +134,7 @@ var serverState = function(options) {
         });
       }
       else {
-        var err = new Error("Authentication failed");
-        err.status = 500;
-        next(err);
+       res.status(500).send('Authentication Failed!');
       }    
     }
     else if (method === "sha1" && param) {
@@ -163,16 +155,12 @@ var serverState = function(options) {
           });
         }
         else {
-          var err = new Error("User has either not tipped or not authenticated properly");
-          err.status = 500;
-          next(err);
+          res.status(500).send("User has either not tipped or not authenticated properly");
         }
       });
     }
     else {
-      var err = new Error("Method Not Defined");
-      err.status = 500;
-      next(err);
+      res.status(500).send("Method not defined");
     }
   });   
 
@@ -180,9 +168,7 @@ var serverState = function(options) {
     if(req.params['sha1']) {
       getCommentsByPost(req.params['sha1'], function (err, comments) {
         if (err) {
-          var err = new Error(err);
-          err.status = 500;
-          next(err);
+          res.status(500).send(err);
         }
         else {
           res.send("" + comments.length);
@@ -190,9 +176,7 @@ var serverState = function(options) {
       });
     }
     else {
-      var err = new Error("no sha1 specified");
-      err.status = 500;
-      next(err);
+      res.status(500).send("no sha1 specified");
     }
   });
 };
