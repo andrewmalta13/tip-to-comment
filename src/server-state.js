@@ -94,9 +94,8 @@ var serverState = function(options) {
     if(req.body.address && req.body.signature && req.body.comment && req.body.network && req.body.sha1) {
       comment(req.body, function (err, comment) {
         if (err) {
-          var err = new Error(err);
-          err.status = 500;
-          next(err);
+          res.status(500).send(err);
+          res.end();
         }
         else {
           res.status(200).send(comment);
@@ -120,6 +119,7 @@ var serverState = function(options) {
 
     if(!signature || !address || !network) {
       res.status(500).send('Missing arguments to retrieve comments!');
+      res.end();
     }
     else if (method === "address" && param) {
       var queryAddress = param;
@@ -151,6 +151,7 @@ var serverState = function(options) {
           getCommentsByPost(sha1, function (err, response) {
             if (err) {
               res.status(500).send(err);
+              res.end();
             }
             else {
               res.status(200).send(response);
