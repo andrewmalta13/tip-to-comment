@@ -94,7 +94,7 @@ var serverState = function(options) {
     if(req.body.address && req.body.signature && req.body.comment && req.body.network && req.body.sha1) {
       comment(req.body, function (err, comment) {
         if (err) {
-          res.status(500).send(err);
+          res.status(200).send(err);
           res.end();
         }
         else {
@@ -104,7 +104,7 @@ var serverState = function(options) {
       });
     }
     else {
-      res.status(500).send('Missing arguments to comment!');
+      res.status(200).send('Missing arguments to comment!');
       res.end();
     }
   });
@@ -118,7 +118,7 @@ var serverState = function(options) {
     var network = req.header('network');
 
     if(!signature || !address || !network) {
-      res.status(500).send('Missing arguments to retrieve comments!');
+      res.status(200).send('Missing arguments to retrieve comments!');
       res.end();
     }
     else if (method === "address" && param) {
@@ -128,7 +128,7 @@ var serverState = function(options) {
       if (checkSig(address, signature, queryAddress, network)) {
         getCommentsByUser(queryAddress, function (err, response) {
           if (err) {
-            res.status(500).send(err);
+            res.status(200).send(err);
             res.end();
           }
           else {
@@ -138,7 +138,7 @@ var serverState = function(options) {
         });
       }
       else {
-       res.status(500).send('Authentication Failed!');
+       res.status(200).send('Authentication Failed!');
        res.end();
       }    
     }
@@ -150,7 +150,7 @@ var serverState = function(options) {
         if (isValid) {
           getCommentsByPost(sha1, function (err, response) {
             if (err) {
-              res.status(500).send(err);
+              res.status(200).send(err);
               res.end();
             }
             else {
@@ -160,13 +160,13 @@ var serverState = function(options) {
           });
         }
         else {
-          res.status(500).send("User has either not tipped or not authenticated properly");
+          res.status(200).send("User has either not tipped or not authenticated properly");
           res.end();
         }
       });
     }
     else {
-      res.status(500).send("Method not defined");
+      res.status(200).send("Method not defined");
       res.end();
     }
   });   
@@ -175,7 +175,7 @@ var serverState = function(options) {
     if(req.params['sha1']) {
       getCommentsByPost(req.params['sha1'], function (err, comments) {
         if (err) {
-          res.status(500).send(err);
+          res.status(200).send(err);
           res.end();
         }
         else {
@@ -185,7 +185,7 @@ var serverState = function(options) {
       });
     }
     else {
-      res.status(500).send("no sha1 specified");
+      res.status(200).send("no sha1 specified");
       res.end();
     }
   });
