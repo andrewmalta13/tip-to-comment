@@ -23,13 +23,18 @@ var serverState = function(options) {
         if (tipInfo.tips.length > 0 && (tipInfo.tips[0].destination === address)) {
           callback(false, true);
         }
-        else {
+        else if (tipInfo.tips.length === 0) {
+          callback("user has not tipped", false);
+        }
+        else{
           var tipCount = 0;
           tipInfo.tips.forEach(function (tip) {
+            console.log(tipCount, tipInfo.tips.length);
             if (tip.sourceAddresses[0] === address) {
               callback(false, true);
             }
             else if (++tipCount === tipInfo.tips.length) {
+              console.log("user has not tipped");
               callback("user has not tipped", false);
             }
           });
@@ -39,6 +44,7 @@ var serverState = function(options) {
   }
 
   function validate(options, callback) {
+    console.log("entered validate")
     var isValidSig = checkSig(options.address, options.signature, options.body, options.network);
     if (isValidSig) {
       checkTip(options.sha1, options.address, function (err, hasTipped) {
@@ -163,7 +169,8 @@ var serverState = function(options) {
           });
         }
         else {
-          res.status(200).send("User has either not tipped or not authenticated properly");
+          res.status(200).send(err);
+          res.end();
         }
       });
     }
@@ -191,6 +198,8 @@ var serverState = function(options) {
       res.end();
     }
   });
+
+
 };
 
 
