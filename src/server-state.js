@@ -58,7 +58,7 @@ var serverState = function(options) {
             callback(err, false);
           }
           else {
-            callback(false, options.comment)
+            callback(false, options);
           }
         });
       }
