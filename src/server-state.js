@@ -118,67 +118,114 @@ var serverState = function(options) {
     }
   });
 
+  /* This is the handler for a strict check on the user having authenticated and tipped. We will be using this code
+     once we have web hooks workign with bsync, but as of now it is very harsh to the user experience as bsync takes
+     a couple of minutes to register a tip (on teststnet) and about 10 minutes on mainnet. The code for getComments
+     right now is not checking for auth nor is it checking for a tip. This will enable the users to view comments without
+     having tipped
+  */
+  // app.get('/getComments/:method/:param', function (req, res, next) {
+  //   var method = req.params["method"];
+  //   var param = req.params["param"];
+
+  //   var signature = req.header('signature');
+  //   var address = req.header('address');
+  //   var network = req.header('network');
+
+  //   if(!signature || !address || !network) {
+  //     res.status(200).send('Missing arguments to retrieve comments!');
+  //     res.end();
+  //   }
+  //   else if (method === "address" && param) {
+  //     var queryAddress = param;
+  //     network = (network === "testnet") ? bitcoinjs.networks.testnet : null;
+      
+  //     if (checkSig(address, signature, queryAddress, network)) {
+  //       getCommentsByUser(queryAddress, function (err, response) {
+  //         if (err) {
+  //           res.status(200).send(err);
+  //           res.end();
+  //         }
+  //         else {
+  //           res.status(200).send(response);
+  //           res.end();
+  //         }
+  //       });
+  //     }
+  //     else {
+  //      res.status(200).send('Authentication Failed!');
+  //      res.end();
+  //     }    
+  //   }
+  //   else if (method === "sha1" && param) {
+  //     var sha1 = param;
+  //     network = (network === "testnet") ? bitcoinjs.networks.testnet : null;
+  //     var options = {address: address, signature: signature, network: network, body: param, sha1: sha1};
+  //     validate(options, function (err, isValid) {
+  //       if (isValid) {
+  //         getCommentsByPost(sha1, function (err, response) {
+  //           if (err) {
+  //             res.status(200).send(err);
+  //             res.end();
+  //           }
+  //           else {
+  //             res.status(200).send(response);
+  //             res.end();
+  //           }
+  //         });
+  //       }
+  //       else {
+  //         res.status(200).send(err);
+  //         res.end();
+  //       }
+  //     });
+  //   }
+  //   else {
+  //     res.status(200).send("Method not defined");
+  //     res.end();
+  //   }
+  // });  
+
   app.get('/getComments/:method/:param', function (req, res, next) {
     var method = req.params["method"];
     var param = req.params["param"];
 
-    var signature = req.header('signature');
     var address = req.header('address');
     var network = req.header('network');
 
-    if(!signature || !address || !network) {
-      res.status(200).send('Missing arguments to retrieve comments!');
-      res.end();
-    }
-    else if (method === "address" && param) {
+     if (method === "address" && param) {
       var queryAddress = param;
-      network = (network === "testnet") ? bitcoinjs.networks.testnet : null;
-      
-      if (checkSig(address, signature, queryAddress, network)) {
-        getCommentsByUser(queryAddress, function (err, response) {
-          if (err) {
-            res.status(200).send(err);
-            res.end();
-          }
-          else {
-            res.status(200).send(response);
-            res.end();
-          }
-        });
-      }
-      else {
-       res.status(200).send('Authentication Failed!');
-       res.end();
-      }    
-    }
-    else if (method === "sha1" && param) {
-      var sha1 = param;
-      network = (network === "testnet") ? bitcoinjs.networks.testnet : null;
-      var options = {address: address, signature: signature, network: network, body: param, sha1: sha1};
-      validate(options, function (err, isValid) {
-        if (isValid) {
-          getCommentsByPost(sha1, function (err, response) {
-            if (err) {
-              res.status(200).send(err);
-              res.end();
-            }
-            else {
-              res.status(200).send(response);
-              res.end();
-            }
-          });
-        }
-        else {
+      getCommentsByUser(queryAddress, function (err, response) {
+        if (err) {
           res.status(200).send(err);
           res.end();
         }
+        else {
+          res.status(200).send(response);
+          res.end();
+        }
       });
+    }
+    else if (method === "sha1" && param) {
+      var sha1 = param;
+      getCommentsByPost(sha1, function (err, response) {
+        if (err) {
+          res.status(200).send(err);
+          res.end();
+        }
+        else {
+          res.status(200).send(response);
+          res.end();
+        }
+      });   
     }
     else {
       res.status(200).send("Method not defined");
       res.end();
     }
-  });   
+  });    
+
+
 
   app.get('/getNumComments/:sha1', function (req, res, next) {
     if(req.params['sha1']) {
