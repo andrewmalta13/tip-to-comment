@@ -197,11 +197,11 @@ var serverState = function(options) {
       var queryAddress = param;
       getCommentsByUser(queryAddress, function (err, response) {
         if (err) {
-          res.status(200).send(err);
+          res.status(200).send(JSON.stringify(err));
           res.end();
         }
         else {
-          res.status(200).send(response);
+          res.status(200).send(JSON.stringify(response));
           res.end();
         }
       });
@@ -245,8 +245,6 @@ var serverState = function(options) {
       res.end();
     }
   });
-
-
 };
 
 
