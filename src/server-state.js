@@ -8,11 +8,15 @@ var serverState = function(options) {
   var app = options.app;
   var commonBlockchain = options.commonBlockchain;
   var dbclient = options.dbclient;
+  
 
+  //returns true if the signature was indeed created by specified address, false otherwise.
+  //NOTE: network should be a bitocoinjs-lib network object (for testnet) or null for mainnet/
   function checkSig (address, signature, message, network) {
     return(bitcoinjs.Message.verify(address, signature, message, network));
   }
   
+  //checks to see if the address has tipped the sha1 and hits the callback with (err (string or false), hasTipped (boolean))
   function checkTip(sha1, address, callback) {
     openpublishState.findTips({sha1: sha1}, function (err, tipInfo) {
       if (err) {
@@ -42,9 +46,9 @@ var serverState = function(options) {
       }
     });
   }
-
+  
+  //checks both to see if a user is who they say they are as well if they have tipped the specified sha1.
   function validate(options, callback) {
-    console.log("entered validate")
     var isValidSig = checkSig(options.address, options.signature, options.body, options.network);
     if (isValidSig) {
       checkTip(options.sha1, options.address, function (err, hasTipped) {
@@ -55,7 +59,9 @@ var serverState = function(options) {
       callback("invalid signature", false);
     }
   }
+  
 
+  //comments on a specified sha1 if validation is successful, otherwise do nothing.
   function comment(options, callback) {
     options.body = options.comment;
     options.network = (options.network === "testnet") ? bitcoinjs.networks.testnet : null;
@@ -76,7 +82,8 @@ var serverState = function(options) {
       }
     });
   }
-
+  
+  //returns the comments on a particular sha1.
   function getCommentsByPost(sha1, callback) {
     dbclient.query("SELECT * FROM comments WHERE sha1 = $1", [sha1], function (err, result) {
       if (err) {
@@ -87,7 +94,8 @@ var serverState = function(options) {
       }
     });
   }
-
+  
+  //returns the comments made by a specified user.
   function getCommentsByUser(address, callback) {
     dbclient.query("SELECT * FROM comments WHERE commenter = $1", [address], function (err, result) {
       if (err) {
@@ -98,7 +106,8 @@ var serverState = function(options) {
       }
     });
   }
-
+  
+  //comment handler.
   app.post('/comment', function (req, res, next){
     if(req.body.address && req.body.signature && req.body.comment && req.body.network && req.body.sha1) {
       comment(req.body, function (err, comment) {
@@ -185,7 +194,10 @@ var serverState = function(options) {
   //     res.end();
   //   }
   // });  
-
+  
+  // this is a handler to get comments (while waiting on hooks from bsync you don't have to validate() to see comments)
+  // method can be either "sha1" or "address". sha1 will query by post and address will query by user. Param should either be
+  // the particular sha1 or public address you are looking to query.
   app.get('/getComments/:method/:param', function (req, res, next) {
     var method = req.params["method"];
     var param = req.params["param"];
@@ -226,7 +238,7 @@ var serverState = function(options) {
   });    
 
 
-
+  //gets the number of comments on a particular sha1.
   app.get('/getNumComments/:sha1', function (req, res, next) {
     if(req.params['sha1']) {
       getCommentsByPost(req.params['sha1'], function (err, comments) {
