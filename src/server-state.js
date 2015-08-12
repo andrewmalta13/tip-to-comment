@@ -213,7 +213,7 @@ var serverState = function(options) {
           res.end();
         }
         else {
-          res.status(200).send(JSON.stringify(response));
+          res.status(200).send(response);
           res.end();
         }
       });
